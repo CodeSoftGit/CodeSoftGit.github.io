@@ -63,20 +63,29 @@ document.querySelectorAll(".project-card, .profile-section, .skill-item").forEac
     observer.observe(element);
 });
 
-const timeDisplay = document.getElementById("time");
+document.addEventListener("DOMContentLoaded", () => {
+    const timeDisplay = document.getElementById("time");
 
-function updateTime() {
-    timeDisplay.textContent = new Date().toLocaleDateString("en-US", {
-        timeZone: "America/New_York",
-        hour12: true,
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit"
-    }) + " EST";
-}
+    function updateTime() {
+        timeDisplay.textContent = new Date().toLocaleDateString("en-US", {
+            timeZone: "America/New_York",
+            hour12: true,
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            second: "2-digit"
+        }) + " EST";
+    }
+
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    new ParticleSystem().animate();
+    fetchGitHubStats();
+    fetchBeatSaberStats();
+});
 
 async function fetchGitHubStats(retries = 3, retryDelay = 1000) {
     const cacheKey = "githubStats";
@@ -167,9 +176,6 @@ async function fetchBeatSaberStats() {
         document.querySelector(".beat-saber-card").style.display = "none";
     }
 }
-
-setInterval(updateTime, 1000);
-updateTime();
 
 const video = document.getElementById("bs-video");
 
