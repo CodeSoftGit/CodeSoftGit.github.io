@@ -381,5 +381,5 @@ img {
 .coming-soon {
   text-align: left;
   display: flex;
-  justify-content: center;
+  justify-content: left;
 }
