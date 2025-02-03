@@ -378,3 +378,8 @@ body.light-theme .bio, body.light-theme .tagline {
 img {
   max-width: 100%;
 }
+.coming-soon {
+  text-align: left;
+  display: flex;
+  justify-content: center;
+}
