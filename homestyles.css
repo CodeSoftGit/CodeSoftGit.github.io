@@ -1,0 +1,377 @@
+  :root {
+  --primary : #7ec8e3;--secondary : #ff7f50;--bg : #1a1a2e;--card-bg : rgba(255, 255, 255, 0.05);--glow-color : rgba(126, 200, 227, 0.5)
+}
+* {
+  margin : 0;
+  padding : 0;
+  box-sizing : border-box;
+  font-family : "Segoe UI", sans-serif
+}
+body {
+  background : var(--bg);
+  color : #e6e6e6;
+  line-height : 1.6;
+  overflow-x : hidden
+}
+.container {
+  max-width : 1200px;
+  margin : 0 auto;
+  padding : 2rem
+}
+header {
+  text-align : center;
+  padding : 2rem 0;
+  position : relative;
+  background : linear-gradient(45deg, var(--primary) 0, var(--secondary) 100%);-webkit-background-clip : text;
+  background-clip : text;-webkit-text-fill-color : transparent
+}
+h1 {
+  font-size : 4rem;
+  margin-bottom : 1rem;
+  font-weight : 700;
+  letter-spacing : -2px
+}
+.tagline {
+  font-size : 1.5rem;
+  color : rgba(230, 230, 230, .8)
+}
+.profile-section {
+  display : flex;
+  align-items : center;
+  gap : 3rem;
+  margin : 4rem 0;
+  padding : 2rem;
+  background : var(--card-bg);
+  border-radius : 15px;
+  position : relative;
+  overflow : hidden
+}
+  .profile-section : :before {
+  content : "";
+  position : absolute;
+  top : -50%;
+  left : -50%;
+  width : 200%;
+  height : 200%;
+  background : linear-gradient(45deg, transparent, var(--primary), transparent);
+  animation : rotate 10s linear infinite;
+  opacity : .1
+}
+.profile-pic {
+  width : 200px;
+  height : 200px;
+  border-radius : 50%;
+  border : 3px solid var(--primary);
+  transition : transform .3s ease;
+  position : relative;
+  z-index : 1
+}
+  .profile-pic : hover {
+  transform : rotate(5deg) scale(1.05);
+  box-shadow : 0 0 30px rgba(126, 200, 227, .4)
+}
+.profile-info {
+  flex : 1;
+  position : relative;
+  z-index : 1
+}
+.time-display {
+  font-size : 1.1rem;
+  color : var(--primary);
+  margin : .5rem 0;
+  padding : .5rem 1rem;
+  background : rgba(126, 200, 227, .1);
+  border-radius : 20px;
+  display : inline-block
+}
+.bio {
+  margin : 1rem 0;
+  color : #ccc;
+  max-width : 600px;
+  font-size : 1.1rem;
+  line-height : 1.8
+}
+.projects {
+  display : grid;
+  grid-template-columns : repeat(auto-fit, minmax(300px, 1fr));
+  gap : 2rem;
+  margin : 4rem 0
+}
+.project-card {
+  background : var(--card-bg);
+  padding : 1.5rem;
+  border-radius : 10px;
+  transition : transform .3s ease;
+  position : relative;
+  overflow : hidden;
+  border : 1px solid rgba(126, 200, 227, .1)
+}
+  .project-card : hover {
+  transform : translateY(-10px);
+  background : rgba(255, 255, 255, .08);
+  box-shadow : 0 10px 30px rgba(0, 0,0, .3)
+}
+.project-title {
+  color : var(--primary);
+  margin-bottom : 1rem;
+  font-size : 1.3rem;
+  display : flex;
+  align-items : center;
+  gap : .5rem
+}
+.project-tech {
+  display : flex;
+  gap : .5rem;
+  margin : 1rem 0;
+  flex-wrap : wrap
+}
+.tech-pill {
+  background : rgba(126, 200, 227, .1);
+  color : var(--primary);
+  padding : .3rem .8rem;
+  border-radius : 20px;
+  font-size : .8rem
+}
+.project-link {
+  color : var(--primary);
+  text-decoration : none;
+  display : inline-flex;
+  align-items : center;
+  gap : .5rem;
+  margin-top : 1rem;
+  transition : opacity .3s ease;
+  padding : .5rem 1rem;
+  border : 1px solid var(--primary);
+  border-radius : 20px
+}
+  .project-link : hover {
+  opacity : .8;
+  background : rgba(126, 200, 227, .1)
+}
+.contact {
+  text-align : center;
+  padding : 4rem 0;
+  border-top : 1px solid rgba(255, 255, 255, .1)
+}
+.social-links {
+  margin-top : 2rem;
+  display : flex;
+  justify-content : center;
+  gap : 2rem
+}
+.social-links a {
+  color : var(--primary);
+  font-size : 2.5rem;
+  transition : transform .3s ease;
+  padding : 1rem;
+  border-radius : 50%;
+  background : rgba(126, 200, 227, .1);
+  width : 60px;
+  height : 60px;
+  display : flex;
+  align-items : center;
+  justify-content : center
+}
+  .social-links a : hover {
+  transform : scale(1.15);
+  background : rgba(126, 200, 227, .2)
+}
+.particles {
+  position : absolute;
+  top : 0;
+  left : 0;
+  width : 100%;
+  height : 100%;
+  pointer-events : none
+}
+@keyframes rotate {
+  0%{transform : rotate(0)
+}
+100% {
+  transform : rotate(360deg)
+}
+  }@media (max-width : 768px) {
+  .profile-section{flex-direction : column;
+  text-align : center
+}
+.profile-pic {
+  width : 150px;
+  height : 150px
+}
+h1 {
+  font-size : 2.5rem
+}
+.tagline {
+  font-size : 1.2rem
+}
+}.skill-chart {
+  display : grid;
+  grid-template-columns : repeat(auto-fit, minmax(200px, 1fr));
+  gap : 1rem;
+  margin : 2rem 0
+}
+.skill-item {
+  background : var(--card-bg);
+  padding : 1rem;
+  border-radius : 10px;
+  text-align : center
+}
+.skill-bar {
+  height : 8px;
+  background : rgba(255, 255, 255, .1);
+  border-radius : 4px;
+  margin : 1rem 0;
+  overflow : hidden
+}
+.skill-progress {
+  height : 100%;
+  background : linear-gradient(90deg, var(--primary), var(--secondary));
+  transition : width 1s ease
+}
+.theme-toggle {
+  position : fixed;
+  top : 20px;
+  right : 20px;
+  cursor : pointer;
+  background : var(--card-bg);
+  padding : 10px;
+  border-radius : 50%;
+  z-index : 1000;
+  transition : transform .3s ease
+}
+  .theme-toggle : hover {
+  transform : rotate(15deg) scale(1.1)
+}
+.weather-card {
+  background : var(--card-bg);
+  padding : 1rem;
+  border-radius : 10px;
+  display : flex;
+  align-items : center;
+  gap : 1rem;
+  margin : 1rem 0;
+  position : relative;
+  overflow : hidden
+}
+.weather-icon i {
+  font-size : 2.5rem;
+  color : var(--secondary)
+}
+.github-stats {
+  display : grid;
+  grid-template-columns : repeat(auto-fit, minmax(150px, 1fr));
+  gap : 1rem;
+  margin : 2rem 0
+}
+.stat {
+  background : var(--card-bg);
+  padding : 1.5rem;
+  border-radius : 10px;
+  text-align : center;
+  transition : transform .3s ease
+}
+  .stat : hover {
+  transform : translateY(-5px)
+}
+.stat i {
+  font-size : 2rem;
+  color : var(--primary);
+  margin-bottom : 1rem
+}
+.count {
+  font-size : 1.5rem;
+  font-weight : 700;
+  color : var(--secondary)
+}
+body.light-theme {
+  --bg : #f0f2f5;--card-bg : rgba(255, 255, 255, 0.9);
+  color : #2c3e50
+}
+body.light-theme .bio, body.light-theme .tagline {
+  color : #666
+}
+.beat-saber-card {
+  position : relative;
+  overflow : visible;
+  min-height : 300px;
+  margin-bottom : 25px;
+  isolation : isolate
+}
+.glow-container {
+  position : absolute;
+  top : 0;
+  left : 0;
+  width : 100%;
+  height : 100%;
+  z-index : -1;
+  border-radius : 15px;
+  overflow : hidden
+}
+  .beat-saber-card : :after {
+  content : "";
+  position : absolute;
+  top : -5%;
+  left : -5%;
+  width : 110%;
+  height : 110%;
+  background : radial-gradient(circle at 50% 50%, var(--glow-color) 0, rgba(126, 200, 227, .2) 30%, rgba(126, 200, 227, 0) 70%);
+  z-index : -1;
+  opacity : 0;
+  transition : opacity .3s ease;
+  filter : blur(30px);
+  mix-blend-mode : screen
+}
+  .beat-saber-card : hover : :after {
+  opacity : 1
+}
+.bs-video-bg {
+  position : absolute;
+  top : 50%;
+  left : 50%;
+  transform : translate(-50%, -50%);
+  min-width : 100%;
+  min-height : 100%;
+  z-index : 0;
+  opacity : .7
+}
+.bs-content {
+  position : relative;
+  z-index : 2;
+  background : rgba(0, 0,0, .7);
+  padding : 1.5rem;
+  border-radius : 10px;
+  backdrop-filter : blur(10px)
+}
+.bs-stats {
+  display : grid;
+  grid-template-columns : repeat(auto-fit, minmax(120px, 1fr));
+  gap : 1rem;
+  margin-top : 1rem
+}
+.bs-stat {
+  background : rgba(126, 200, 227, .1);
+  padding : .8rem;
+  border-radius : 8px;
+  text-align : center
+}
+.bs-stat h4 {
+  color : var(--primary);
+  margin-bottom : .5rem;
+  font-size : 1.1rem
+}
+.bs-stat p {
+  font-size : 1.2rem;
+  font-weight : 700
+}
+.clans {
+  display : flex;
+  gap : .5rem;
+  flex-wrap : wrap;
+  margin-top : 1rem
+}
+.clan-tag {
+  background : rgba(255, 255, 255, .1);
+  padding : .3rem .8rem;
+  border-radius : 15px;
+  font-size : .9rem
+}
