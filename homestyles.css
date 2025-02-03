@@ -375,3 +375,6 @@ body.light-theme .bio, body.light-theme .tagline {
   border-radius : 15px;
   font-size : .9rem
 }
+img {
+  max-width: 100%;
+}
