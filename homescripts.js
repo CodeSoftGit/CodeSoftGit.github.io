@@ -127,10 +127,14 @@ function applyBeatSaberStats(stats) {
     const flagUrl = `https://flagcdn.com/h20/${country.toLowerCase()}.png`;
 
     document.getElementById("bs-rank").textContent = `#${stats.rank.toLocaleString()}`;
-    document.getElementById("bs-country-rank").innerHTML = `
-        <img src="${flagUrl}" alt="${country} flag" style="margin-right:6px;">
-        #${stats.countryRank.toLocaleString()}
-    `;
+    const bsCountryRankElement = document.getElementById("bs-country-rank");
+    bsCountryRankElement.innerHTML = ''; // Clear any existing content
+    const img = document.createElement('img');
+    img.src = flagUrl;
+    img.alt = `${country} flag`;
+    img.style.marginRight = '6px';
+    bsCountryRankElement.appendChild(img);
+    bsCountryRankElement.appendChild(document.createTextNode(`#${stats.countryRank.toLocaleString()}`));
     document.getElementById("bs-pp").textContent = Math.round(stats.pp).toLocaleString();
     document.getElementById("bs-playcount").textContent = stats.scoreStats.totalPlayCount.toLocaleString();
 
