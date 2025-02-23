@@ -621,3 +621,73 @@ a {
     margin-bottom: 1.5rem;
     color: #E6E6E6;
 }
+
+.discord-presence img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Mobile Improvements */
+@media (max-width: 600px) {
+  body {
+    padding: 0 1rem;
+    max-width: 100%;
+  }
+  .container {
+    padding: 0;
+    margin: 0 auto;
+    width: 100%;
+  }
+  /* Navigation */
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .navbar .logo {
+    display:none;
+  }
+  .navbar .menu {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .navbar .menu li a {
+    padding: 0.5rem 1rem;
+    font-size: 1.1rem;
+  }
+  /* Header */
+  header {
+    padding: 2rem 0;
+  }
+  h1 {
+    font-size: 2.5rem;
+  }
+  .tagline {
+    font-size: 1.2rem;
+  }
+  /* Profile Section */
+  .profile-section {
+    flex-direction: column;
+    padding: 1rem;
+  }
+  .profile-pic {
+    width: 150px;
+    height: 150px;
+  }
+  /* General spacing */
+  .projects,
+  .hot-takes,
+  .contact {
+    padding: 1rem;
+  }
+  /* Increase tap areas on buttons */
+  .project-link, 
+  .hot-takes-button, 
+  .button {
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+  }
+}
