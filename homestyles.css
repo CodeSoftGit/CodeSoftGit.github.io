@@ -401,3 +401,30 @@ img {
 .see-more-button:hover {
   background: var(--secondary);
 }
+.see-more-section {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: var(--card-bg);
+  border-radius: 15px;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+.see-more-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.see-more-item i {
+  font-size: 2rem;
+  color: var(--primary);
+}
+.see-more-content h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+}
+.see-more-content p {
+  font-size: 1rem;
+  color: #ccc;
+}
