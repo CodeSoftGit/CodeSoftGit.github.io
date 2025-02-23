@@ -1,4 +1,4 @@
-  :root {
+:root {
   --primary : #7ec8e3;--secondary : #ff7f50;--bg : #1a1a2e;--card-bg : rgba(255, 255, 255, 0.05);--glow-color : rgba(126, 200, 227, 0.5)
 }
 * {
@@ -427,4 +427,102 @@ img {
 .see-more-content p {
   font-size: 1rem;
   color: #ccc;
+}
+
+/* Navigation Bar Styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: var(--card-bg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.navbar .menu {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.navbar .menu li {
+  display: inline;
+}
+
+.navbar .menu li a {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.navbar .menu li a:hover {
+  color: var(--secondary);
+}
+
+.navbar .menu li a i {
+  font-size: 1.2rem;
+}
+
+/* Header Section Styles */
+.motivational-phrase {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--primary);
+  margin-top: 1rem;
+}
+
+.motivational-phrase .highlight {
+  text-decoration: underline;
+  text-decoration-color: var(--secondary);
+}
+
+/* Content Section Styles */
+.things-to-do {
+  margin-top: 4rem;
+}
+
+.things-to-do h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.things-to-do p {
+  font-size: 1.2rem;
+  color: #ccc;
+  margin-bottom: 2rem;
+}
+
+.button-container {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: var(--primary);
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.2rem;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.button:hover {
+  background: var(--secondary);
+}
+
+.button i {
+  font-size: 1.5rem;
 }
