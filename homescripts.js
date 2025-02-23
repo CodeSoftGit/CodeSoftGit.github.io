@@ -246,4 +246,20 @@ document.addEventListener("DOMContentLoaded", () => {
     new ParticleSystem().animate();
     fetchGitHubStats();
     fetchBeatSaberStats();
+    document.body.style.opacity = 1;
+
+    // Attach click events to internal links to trigger fade out before navigating
+    document.querySelectorAll('a[href]').forEach(link => {
+        // Only process internal links
+        if (link.hostname === window.location.hostname) {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const destination = link.href;
+                document.body.style.opacity = 0;
+                setTimeout(() => {
+                    window.location.href = destination;
+                }, 500); // duration matches CSS transition
+            });
+        }
+    });
 });

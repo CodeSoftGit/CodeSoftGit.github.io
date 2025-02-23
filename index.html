@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
     <link rel="icon" type="image/x-icon" href="/favicon.ico" width="32" height="32">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -19,14 +20,21 @@
     <meta name="google-site-verification" content="kHDj_N9_UA1AtZ7Wc9ddaw7Q5QJ-q1kxVNfXaaowev4">
     <title>CodeSoft | Developer Portfolio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="/homestyles.css">
-    <script src="/homescripts.js" nonce="actual-nonce-value"></script>
+    <link rel="stylesheet" href="homestyles.css">
+    <script src="homescripts.js" nonce="actual-nonce-value"></script>
     <script type="application/ld+json" nonce="<nonce-value>">{ "@context": "https://schema.org", "@type": "Person", "name": "CodeSoft", "url": "https://codesoft.is-a.dev/", "sameAs": [ "https://github.com/CodeSoftGit", "https://discord.com/users/codesoft" ], "jobTitle": "Developer (Hobbyist)" }
     </script>
 </head>
 
 <body>
     <div class="container">
+        <nav class="navbar">
+            <div class="logo">CodeSoft</div>
+            <ul class="menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="hot-takes.html">Hot Takes</a></li>
+            </ul>
+        </nav>
         <header>
             <h1>CodeSoft</h1>
             <p class="tagline">Developer & Creative Technologist</p>
@@ -78,24 +86,60 @@
         <section class="projects">
             <div class="project-card">
                 <h3 class="project-title">ReeSaber.py</h3>
-                <p>Python framework for creating custom Beat Saber sabers with modular components</p><a href="https://github.com/CodeSoftGit/reesaber-py" class="project-link" target="_blank" rel="noopener">Explore →</a></div>
+                <p>Python framework for creating custom Beat Saber sabers with modular components</p>
+                <div class="project-tech">
+                    <span class="tech-pill">Python</span>
+                    <span class="tech-pill">Beat Saber</span>
+                </div>
+                <a href="https://github.com/CodeSoftGit/reesaber-py" class="project-link" target="_blank" rel="noopener">Explore →</a>
+            </div>
             <div class="project-card">
                 <h3 class="project-title">hsv.py</h3>
-                <p> Manipulation framework for Beat Saber HSV presets</p><a href="https://github.com/CodeSoftGit/hsv-py" class="project-link" target="_blank" rel="noopener">Explore →</a></div>
+                <p>Manipulation framework for Beat Saber HSV presets</p>
+                <div class="project-tech">
+                    <span class="tech-pill">Python</span>
+                    <span class="tech-pill">Beat Saber</span>
+                </div>
+                <a href="https://github.com/CodeSoftGit/hsv-py" class="project-link" target="_blank" rel="noopener">Explore →</a>
+            </div>
             <div class="project-card">
                 <h3 class="project-title">disciplinedProcesses</h3>
-                <p>Lightweight process priority manager</p><a href="https://github.com/CodeSoftGit/disciplinedProcesses" class="project-link" target="_blank" rel="noopener">Explore →</a></div>
+                <p>Lightweight process priority manager</p>
+                <div class="project-tech">
+                    <span class="tech-pill">Python</span>
+                    <span class="tech-pill">Process Management</span>
+                    <span class="tech-pill">Performance</span>
+                </div>
+                <a href="https://github.com/CodeSoftGit/disciplinedProcesses" class="project-link" target="_blank" rel="noopener">Explore →</a>
+            </div>
             <div class="project-card">
                 <h3 class="project-title">AI-RPS</h3>
-                <p>Adaptive AI opponent that learns your rock-paper-scissors patterns in real-time</p><a href="https://github.com/CodeSoftGit/ai-rps" class="project-link" target="_blank" rel="noopener">Challenge The Machine →</a></div>
+                <p>Adaptive AI opponent that learns your rock-paper-scissors patterns in real-time</p>
+                <div class="project-tech">
+                    <span class="tech-pill">Python</span>
+                    <span class="tech-pill">AI</span>
+                    <span class="tech-pill">Game</span>
+                </div>
+                <a href="https://github.com/CodeSoftGit/ai-rps" class="project-link" target="_blank" rel="noopener">Challenge The Machine →</a>
+            </div>
             <div class="project-card">
                 <h3 class="project-title">BSRank</h3>
-                <p>Machine learning model for predicting Beat Saber map difficulties accurately</p><a href="https://github.com/CodeSoftGit/bsrank" class="project-link" target="_blank" rel="noopener">Explore →</a></div>
-            <div class="project-card" style="position:relative">
+                <p>Machine learning model for predicting Beat Saber map difficulties accurately</p>
+                <div class="project-tech">
+                    <span class="tech-pill">Python</span>
+                    <span class="tech-pill">Machine Learning</span>
+                    <span class="tech-pill">Beat Saber</span>
+                </div>
+                <a href="https://github.com/CodeSoftGit/bsrank" class="project-link" target="_blank" rel="noopener">Explore →</a>
+            </div>
+            <div class="project-card coming-soon-card" style="position:relative">
                 <div class="coming-soon"><i class="fas fa-wrench"></i> In Development</div>
                 <h3 class="project-title">Next Project</h3>
                 <p>Secret...</p>
-                <div class="project-tech"><span class="tech-pill">AI</span><span class="tech-pill">Beat Saber</span></div>
+                <div class="project-tech">
+                    <span class="tech-pill">AI</span>
+                    <span class="tech-pill">Beat Saber</span>
+                </div>
             </div>
         </section>
         <div class="project-card beat-saber-card">
@@ -127,6 +171,14 @@
                 <div class="clans" id="clans-container"></div>
             </div>
         </div>
+        <div class="see-more-text" style="text-align: center; margin: 2rem 0;">
+            <h2>See More</h2>
+          </div>
+          
+          <a href="hot-takes.html" class="hot-takes-button">
+            <i class="fas fa-fire"></i>
+            <span>Hot Takes</span>
+          </a>
         <section class="contact">
             <h2>Let's Collaborate</h2>
             <div class="social-links"><a href="https://github.com/CodeSoftGit" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a><a href="https://discord.com/users/codesoft" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i></a></div>
