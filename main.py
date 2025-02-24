@@ -4,14 +4,31 @@ import secrets
 import time
 import sys
 import redis
-from flask import Flask, request, redirect, render_template, make_response, send_from_directory, abort
+import logging
+from flask import (
+    Flask,
+    request,
+    redirect,
+    render_template,
+    make_response,
+    send_from_directory,
+    abort,
+    url_for,
+)
 
 app = Flask(__name__, template_folder=".", static_folder=None)
 startTime = time.time()
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+
 # Initialize Redis connection
 REDIS_URL = os.getenv("REDIS_URL", "redis://...")
-redis_client = redis.StrictRedis.from_url(REDIS_URL, decode_responses=True)
+try:
+    redis_client = redis.StrictRedis.from_url(REDIS_URL, decode_responses=True)
+except Exception as e:
+    logging.error(f"Redis connection error: {e}")
+    sys.exit("Failed to connect to Redis.")
 
 # Load the secret passkey from the environment variable.
 REGISTRATION_PASSKEY = os.getenv("REGISTRATION_PASSKEY", "pass...")
@@ -19,7 +36,18 @@ REGISTRATION_PASSKEY = os.getenv("REGISTRATION_PASSKEY", "pass...")
 @app.before_request
 def count_requests():
     path = request.path
-    redis_client.hincrby("analytics", path, 1)
+    try:
+        redis_client.hincrby("analytics", path, 1)
+    except Exception as e:
+        logging.error(f"Error updating analytics for path {path}: {e}")
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect("https://http.cat/images/404.jpg"), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    return redirect("https://http.cat/images/500.jpg"), 500
 
 @app.route("/")
 def home():
@@ -31,11 +59,11 @@ def hot_takes():
 
 @app.route("/hot-takes.html")
 def hot_takes_redirect():
-    return redirect("/hot-takes")
+    return redirect(url_for("hot_takes"))
 
 @app.route("/index.html")
 def index():
-    return redirect("/")
+    return redirect(url_for("home"))
 
 # Serve static files manually.
 @app.route("/homestyles.css")
@@ -85,8 +113,12 @@ def login():
     passkey = request.form.get("passkey", "")
     if passkey == REGISTRATION_PASSKEY:
         token = secrets.token_hex(16)
-        redis_client.sadd("sessions", token)
-        response = make_response(redirect("/add-link-form"))
+        try:
+            redis_client.sadd("sessions", token)
+        except Exception as e:
+            logging.error(f"Error creating session: {e}")
+            abort(500)
+        response = make_response(redirect(url_for("add_link_form")))
         response.set_cookie("session", token, httponly=True, secure=True)
         return response
     return "Unauthorized", 401
@@ -94,45 +126,52 @@ def login():
 @app.route("/add-link-form")
 def add_link_form():
     token = request.cookies.get("session")
-    if not redis_client.sismember("sessions", token):
-        return redirect("/login")
+    if not token or not redis_client.sismember("sessions", token):
+        return redirect(url_for("login_form"))
     return render_template("add_link.html")
 
 @app.route("/add-link", methods=["POST"])
 def add_link():
     token = request.cookies.get("session")
-    if not redis_client.sismember("sessions", token):
+    if not token or not redis_client.sismember("sessions", token):
         return "Unauthorized", 401
     alias = request.form.get("alias")
     target_url = request.form.get("url")
     if not alias or not target_url:
         return "Missing alias or url field", 400
-    redis_client.hset("links", alias, target_url)
+    # Optionally add further validation for 'alias' and 'target_url'
+    try:
+        redis_client.hset("links", alias, target_url)
+    except Exception as e:
+        logging.error(f"Error storing link: {e}")
+        abort(500)
     return f"Alias /{alias} registered to {target_url}"
 
 # Route to redirect short links.
 @app.route("/<alias>")
 def redirect_alias(alias):
-    target_url = redis_client.hget("links", alias)
+    try:
+        target_url = redis_client.hget("links", alias)
+    except Exception as e:
+        logging.error(f"Error fetching alias {alias}: {e}")
+        abort(500)
     if target_url:
         return redirect(target_url)
     return "Not found", 404
 
 @app.route("/insights")
 def usage_insights():
-    data = {
-        "uptime": time.time() - startTime,
-        "registered_links": redis_client.hlen("links"),
-        "active_sessions": redis_client.scard("sessions"),
-        "request_counts": redis_client.hgetall("analytics"),
-    }
+    try:
+        data = {
+            "uptime": time.time() - startTime,
+            "registered_links": redis_client.hlen("links"),
+            "active_sessions": redis_client.scard("sessions"),
+            "request_counts": redis_client.hgetall("analytics"),
+        }
+    except Exception as e:
+        logging.error(f"Error fetching insights: {e}")
+        abort(500)
     return render_template("insights.html", data=data)
 
-# Example Redis operations
-@app.route("/test-redis")
-def test_redis():
-    success = redis_client.set("foo", "bar")
-    if success:
-        result = redis_client.get("foo")
-        return f"Set 'foo' to 'bar', got back: {result}"
-    return "Failed to set 'foo'", 500
+if __name__ == "__main__":
+    app.run(debug=True)
