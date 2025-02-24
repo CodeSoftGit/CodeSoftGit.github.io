@@ -50,11 +50,11 @@ def count_requests():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return redirect("https://http.cat/images/404.jpg"), 404
+    return redirect("https://http.cat/images/404.jpg")
 
 @app.errorhandler(500)
 def server_error(e):
-    return redirect("https://http.cat/images/500.jpg"), 500
+    return redirect("https://http.cat/images/500.jpg")
 
 @app.route("/")
 def home():
