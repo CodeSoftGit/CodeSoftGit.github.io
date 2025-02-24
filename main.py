@@ -18,6 +18,7 @@ from flask import (
     url_for,
 )
 from flask_wtf.csrf import CSRFProtect
+from markupsafe import escape
 
 app = Flask(__name__, template_folder=".", static_folder=None)
 # Set a secret key for session and CSRF protection.
@@ -161,7 +162,7 @@ def add_link():
     except Exception as e:
         logging.error(f"Error storing link: {e}")
         abort(500)
-    return f"Alias /{alias} registered to {target_url}"
+    return f"Alias /{escape(alias)} registered to {escape(target_url)}"
 
 # Route to redirect short links.
 @app.route("/<alias>")
