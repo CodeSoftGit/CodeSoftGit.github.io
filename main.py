@@ -3,26 +3,18 @@ import json
 import secrets
 import time
 import sys
+from flask import Flask, request, redirect, render_template, make_response, send_from_directory, abort
 
-from sanic import Sanic
-from sanic.response import text, redirect
-from mangum import Mangum
-from jinja2 import FileSystemLoader
-from sanic_jinja2 import SanicJinja2
-
-app = Sanic("Portfolio")
-jinja = SanicJinja2(app, loader=FileSystemLoader("."))
+app = Flask(__name__, template_folder=".", static_folder=None)
 startTime = time.time()
-
 ANALYTICS = {}
 
-@app.middleware('request')
-async def count_requests(request):
+@app.before_request
+def count_requests():
     path = request.path
     ANALYTICS[path] = ANALYTICS.get(path, 0) + 1
 
 # Load the secret passkey from the environment variable.
-# Set REGISTRATION_PASSKEY in your environment (e.g., using set REGISTRATION_PASSKEY=your_secure_key on Windows)
 REGISTRATION_PASSKEY = os.getenv("REGISTRATION_PASSKEY", "mysecretpasskey")
 
 LINKS_FILE = "./links.json"
@@ -36,106 +28,113 @@ else:
 
 SESSIONS = set()
 
-@app.get("/")
-async def home(request):
-    return jinja.render("index.html", request)
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-@app.get("/hot-takes")
-async def hot_takes(request):
-    return jinja.render("hot-takes.html", request)
+@app.route("/hot-takes")
+def hot_takes():
+    return render_template("hot-takes.html")
 
-@app.get("/hot-takes.html")
-async def hot_takes_redirect(request):
+@app.route("/hot-takes.html")
+def hot_takes_redirect():
     return redirect("/hot-takes")
 
-@app.get("/index.html")
-async def index(_):
+@app.route("/index.html")
+def index():
     return redirect("/")
 
-# Serve static files using built-in static middleware with explicit unique route names
-app.static('/homestyles.css', './homestyles.css', name="static-homestyles")
-app.static('/homescripts.js', './homescripts.js', name="static-homescripts")
-app.static('/favicon.ico', './favicon.ico', name="static-favicon")
-app.static('/robots.txt', './robots.txt', name="static-robots")
-app.static('/sitemap.xml', './sitemap.xml', name="static-sitemap")
-app.static('/bs.mp4', './bs.mp4', name="static-bs")
+# Serve static files manually.
+@app.route("/homestyles.css")
+def homestyles():
+    return send_from_directory(".", "homestyles.css")
 
-@app.get("/heartbeat")
-async def heartbeat(_):
-    return text("I'm alive!")
+@app.route("/homescripts.js")
+def homescripts():
+    return send_from_directory(".", "homescripts.js")
 
-@app.get("/info")
-async def info(_):
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(".", "favicon.ico")
+
+@app.route("/robots.txt")
+def robots():
+    return send_from_directory(".", "robots.txt")
+
+@app.route("/sitemap.xml")
+def sitemap():
+    return send_from_directory(".", "sitemap.xml")
+
+@app.route("/bs.mp4")
+def bs_mp4():
+    return send_from_directory(".", "bs.mp4")
+
+@app.route("/heartbeat")
+def heartbeat():
+    return "I'm alive!"
+
+@app.route("/info")
+def info():
     uptime = time.time() - startTime
-    return text(
-        f"Built with love and caffeine using Sanic.\nSanic version: {Sanic.__version__}\n"
+    return (
+        f"Built with love and caffeine using Flask.\nFlask version: {Flask.__version__}\n"
         f"Python version: {sys.version}\nUptime: {uptime}\n"
     )
 
 # --- Authentication and UI Routes ---
 
-@app.get("/login")
-async def login_form(request):
-    return jinja.render("login.html", request)
+@app.route("/login", methods=["GET"])
+def login_form():
+    return render_template("login.html")
 
-@app.post("/login")
-async def login(request):
-    form_data = await request.form()
-    passkey = form_data.get("passkey", "")
+@app.route("/login", methods=["POST"])
+def login():
+    passkey = request.form.get("passkey", "")
     if passkey == REGISTRATION_PASSKEY:
-        # Generate a secure token for this session.
         token = secrets.token_hex(16)
         SESSIONS.add(token)
-        response = redirect("/add-link-form")
-        # Set cookie with HttpOnly and secure flags (secure flag is effective over HTTPS)
-        response.cookies["session"] = token
-        response.cookies["session"]["httponly"] = True
-        response.cookies["session"]["secure"] = True
+        response = make_response(redirect("/add-link-form"))
+        response.set_cookie("session", token, httponly=True, secure=True)
         return response
-    return text("Unauthorized", status=401)
+    return "Unauthorized", 401
 
-@app.get("/add-link-form")
-async def add_link_form(request):
+@app.route("/add-link-form")
+def add_link_form():
     token = request.cookies.get("session")
     if token not in SESSIONS:
         return redirect("/login")
-    return jinja.render("add_link.html", request)
+    return render_template("add_link.html")
 
-# Protected endpoint that expects form submission and saves updated LINKS to a file.
-@app.post("/add-link")
-async def add_link(request):
+@app.route("/add-link", methods=["POST"])
+def add_link():
     token = request.cookies.get("session")
     if token not in SESSIONS:
-        return text("Unauthorized", status=401)
-    form_data = await request.form()
-    alias = form_data.get("alias")
-    target_url = form_data.get("url")
+        return "Unauthorized", 401
+    alias = request.form.get("alias")
+    target_url = request.form.get("url")
     if not alias or not target_url:
-        return text("Missing alias or url field", status=400)
+        return "Missing alias or url field", 400
     LINKS[alias] = target_url
-    # Save the updated LINKS dictionary to file.
     with open(LINKS_FILE, "w") as f:
         json.dump(LINKS, f)
-    return text(f"Alias /{alias} registered to {target_url}")
+    return f"Alias /{alias} registered to {target_url}"
 
-# Route to redirect short links
-@app.get("/<alias>")
-async def redirect_alias(request, alias):
+# Route to redirect short links.
+@app.route("/<alias>")
+def redirect_alias(alias):
     if alias in LINKS:
         return redirect(LINKS[alias])
-    return text("Not found", status=404)
+    return "Not found", 404
 
-@app.get("/insights")
-async def usage_insights(request):
+@app.route("/insights")
+def usage_insights():
     data = {
         "uptime": time.time() - startTime,
         "registered_links": len(LINKS),
         "active_sessions": len(SESSIONS),
         "request_counts": ANALYTICS,
     }
-    return jinja.render("insights.html", request, data=data)
-
-handler = Mangum(app._asgi_app)
+    return render_template("insights.html", data=data)
 
 if __name__ == "__main__":
-    handler = Mangum(app._asgi_app)
+    app.run()
