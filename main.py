@@ -135,6 +135,3 @@ def usage_insights():
         "request_counts": ANALYTICS,
     }
     return render_template("insights.html", data=data)
-
-if __name__ == "__main__":
-    app.run()
