@@ -3,30 +3,23 @@ import json
 import secrets
 import time
 import sys
+import redis
 from flask import Flask, request, redirect, render_template, make_response, send_from_directory, abort
 
 app = Flask(__name__, template_folder=".", static_folder=None)
 startTime = time.time()
-ANALYTICS = {}
+
+# Initialize Redis connection
+REDIS_URL = os.getenv("REDIS_URL", "redis://...")
+redis_client = redis.StrictRedis.from_url(REDIS_URL, decode_responses=True)
+
+# Load the secret passkey from the environment variable.
+REGISTRATION_PASSKEY = os.getenv("REGISTRATION_PASSKEY", "pass...")
 
 @app.before_request
 def count_requests():
     path = request.path
-    ANALYTICS[path] = ANALYTICS.get(path, 0) + 1
-
-# Load the secret passkey from the environment variable.
-REGISTRATION_PASSKEY = os.getenv("REGISTRATION_PASSKEY", "mysecretpasskey")
-
-LINKS_FILE = "./links.json"
-
-# Load LINKS from file if exists, otherwise initialize empty dictionary.
-if os.path.exists(LINKS_FILE):
-    with open(LINKS_FILE, "r") as f:
-        LINKS = json.load(f)
-else:
-    LINKS = {}
-
-SESSIONS = set()
+    redis_client.hincrby("analytics", path, 1)
 
 @app.route("/")
 def home():
@@ -92,7 +85,7 @@ def login():
     passkey = request.form.get("passkey", "")
     if passkey == REGISTRATION_PASSKEY:
         token = secrets.token_hex(16)
-        SESSIONS.add(token)
+        redis_client.sadd("sessions", token)
         response = make_response(redirect("/add-link-form"))
         response.set_cookie("session", token, httponly=True, secure=True)
         return response
@@ -101,37 +94,45 @@ def login():
 @app.route("/add-link-form")
 def add_link_form():
     token = request.cookies.get("session")
-    if token not in SESSIONS:
+    if not redis_client.sismember("sessions", token):
         return redirect("/login")
     return render_template("add_link.html")
 
 @app.route("/add-link", methods=["POST"])
 def add_link():
     token = request.cookies.get("session")
-    if token not in SESSIONS:
+    if not redis_client.sismember("sessions", token):
         return "Unauthorized", 401
     alias = request.form.get("alias")
     target_url = request.form.get("url")
     if not alias or not target_url:
         return "Missing alias or url field", 400
-    LINKS[alias] = target_url
-    with open(LINKS_FILE, "w") as f:
-        json.dump(LINKS, f)
+    redis_client.hset("links", alias, target_url)
     return f"Alias /{alias} registered to {target_url}"
 
 # Route to redirect short links.
 @app.route("/<alias>")
 def redirect_alias(alias):
-    if alias in LINKS:
-        return redirect(LINKS[alias])
+    target_url = redis_client.hget("links", alias)
+    if target_url:
+        return redirect(target_url)
     return "Not found", 404
 
 @app.route("/insights")
 def usage_insights():
     data = {
         "uptime": time.time() - startTime,
-        "registered_links": len(LINKS),
-        "active_sessions": len(SESSIONS),
-        "request_counts": ANALYTICS,
+        "registered_links": redis_client.hlen("links"),
+        "active_sessions": redis_client.scard("sessions"),
+        "request_counts": redis_client.hgetall("analytics"),
     }
     return render_template("insights.html", data=data)
+
+# Example Redis operations
+@app.route("/test-redis")
+def test_redis():
+    success = redis_client.set("foo", "bar")
+    if success:
+        result = redis_client.get("foo")
+        return f"Set 'foo' to 'bar', got back: {result}"
+    return "Failed to set 'foo'", 500
