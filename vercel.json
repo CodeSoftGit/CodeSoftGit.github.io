@@ -5,6 +5,7 @@
             "src": "main.py",
             "use": "@vercel/python",
             "config": {
+                "handler": "handler",
                 "requirements": "requirements.txt"
             }
         }
