@@ -55,6 +55,10 @@ async def index(_):
 # Serve static files using built-in static middleware with explicit unique route names
 app.static('/homestyles.css', './homestyles.css', name="static-homestyles")
 app.static('/homescripts.js', './homescripts.js', name="static-homescripts")
+app.static('/favicon.ico', './favicon.ico', name="static-favicon")
+app.static('/robots.txt', './robots.txt', name="static-robots")
+app.static('/sitemap.xml', './sitemap.xml', name="static-sitemap")
+app.static('/bs.mp4', './bs.mp4', name="static-bs")
 
 @app.get("/heartbeat")
 async def heartbeat(_):
