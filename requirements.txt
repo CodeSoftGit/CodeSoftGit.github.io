@@ -1,0 +1,4 @@
+sanic
+sanic-jinja2
+jinja2
+mangum

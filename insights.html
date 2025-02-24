@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Usage Insights</title>
+    <!-- Include Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Usage Insights</h1>
+    <p><strong>Uptime:</strong> {{ data.uptime | round(2) }} seconds</p>
+    <p><strong>Registered Links:</strong> {{ data.registered_links }}</p>
+    <p><strong>Active Sessions:</strong> {{ data.active_sessions }}</p>
+
+    <h2>Request Counts per Endpoint</h2>
+    <canvas id="reqChart" width="600" height="300"></canvas>
+
+    <script>
+        // Prepare data from the passed analytics dictionary.
+        var requestCounts = {{ data.request_counts | tojson }};
+        var labels = Object.keys(requestCounts);
+        var counts = Object.values(requestCounts);
+
+        // Create a bar chart using Chart.js.
+        var ctx = document.getElementById('reqChart').getContext('2d');
+        var reqChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Request Count',
+                    data: counts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
