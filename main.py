@@ -3,8 +3,10 @@ import json
 import secrets
 import time
 import sys
-import redis
+import re
 import logging
+import redis
+from urllib.parse import urlparse
 from flask import (
     Flask,
     request,
@@ -15,8 +17,12 @@ from flask import (
     abort,
     url_for,
 )
+from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__, template_folder=".", static_folder=None)
+# Set a secret key for session and CSRF protection.
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", secrets.token_hex(16))
+csrf = CSRFProtect(app)
 startTime = time.time()
 
 # Set up logging
@@ -25,7 +31,7 @@ logging.basicConfig(level=logging.INFO)
 # Initialize Redis connection
 REDIS_URL = os.getenv("REDIS_URL", "redis://...")
 try:
-    redis_client = redis.StrictRedis.from_url(REDIS_URL, decode_responses=True)
+    redis_client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
 except Exception as e:
     logging.error(f"Redis connection error: {e}")
     sys.exit("Failed to connect to Redis.")
@@ -119,7 +125,8 @@ def login():
             logging.error(f"Error creating session: {e}")
             abort(500)
         response = make_response(redirect(url_for("add_link_form")))
-        response.set_cookie("session", token, httponly=True, secure=True)
+        # Set cookie with expiration and SameSite flag.
+        response.set_cookie("session", token, httponly=True, secure=True, samesite="Strict", max_age=3600)
         return response
     return "Unauthorized", 401
 
@@ -139,7 +146,16 @@ def add_link():
     target_url = request.form.get("url")
     if not alias or not target_url:
         return "Missing alias or url field", 400
-    # Optionally add further validation for 'alias' and 'target_url'
+
+    # Validate alias: allow only alphanumerics, dashes, and underscores.
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", alias):
+        return "Invalid alias", 400
+
+    # Validate target_url: only allow HTTP and HTTPS protocols.
+    parsed_url = urlparse(target_url)
+    if parsed_url.scheme not in ["http", "https"]:
+        return "Invalid URL scheme", 400
+
     try:
         redis_client.hset("links", alias, target_url)
     except Exception as e:
@@ -156,6 +172,10 @@ def redirect_alias(alias):
         logging.error(f"Error fetching alias {alias}: {e}")
         abort(500)
     if target_url:
+        parsed_url = urlparse(target_url)
+        if parsed_url.scheme not in ["http", "https"]:
+            logging.error(f"Invalid URL scheme for alias {alias}: {target_url}")
+            abort(400)
         return redirect(target_url)
     return "Not found", 404
 
@@ -172,6 +192,3 @@ def usage_insights():
         logging.error(f"Error fetching insights: {e}")
         abort(500)
     return render_template("insights.html", data=data)
-
-if __name__ == "__main__":
-    app.run(debug=True)
