@@ -32,6 +32,64 @@
 
   gtag('config', 'G-P58K93TXCH');
 </script>
+<script
+  async
+  crossorigin="anonymous"
+  data-clerk-publishable-key="pk_test_YWRqdXN0ZWQtY2hpbXAtMzkuY2xlcmsuYWNjb3VudHMuZGV2JA"
+  src="https://adjusted-chimp-39.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
+  type="text/javascript"
+></script>
+<script>
+    window.addEventListener('load', async function() {
+      await Clerk.load();
+  
+      const signInLink = document.getElementById('signInLink');
+      const signInOverlay = document.getElementById('signInOverlay');
+      const accountLink = document.getElementById('accountLink');
+  
+      // Open/close the overlay
+      signInLink.addEventListener('click', () => {
+        signInOverlay.classList.toggle('hidden');
+      });
+  
+      // Update nav based on auth state
+      Clerk.addListener(({ user }) => {
+        if (user) {
+          signInLink.classList.add('hidden');
+          accountLink.classList.remove('hidden');
+        } else {
+          signInLink.classList.remove('hidden');
+          accountLink.classList.add('hidden');
+        }
+      });
+    });
+  </script>
+  <style>
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .modal {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 5px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+<script>
+    window.addEventListener('load', async function () {
+      await Clerk.load()
+  
+      console.log('ClerkJS is loaded')
+    })
+  </script>
 </head>
 
 <body>
@@ -41,7 +99,9 @@
             <ul class="menu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="hot-takes.html">Hot Takes</a></li>
-            </ul>
+                <li id="signInLink"><a href="#"><i class="fas fa-user"></i> Sign In</a></li>
+                <li id="accountLink" class="hidden"><a href="#" onclick="Clerk.openUserProfile()"><i class="fas fa-user-cog"></i> Account</a></li>
+              </ul>
         </nav>
         <header>
             <h1>CodeSoft</h1>
@@ -194,6 +254,11 @@
             <div class="social-links"><a href="https://github.com/CodeSoftGit" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a><a href="https://discord.com/users/codesoft" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i></a></div>
             <p class="note">I prefer communication via public forums. Discord DMS will likely be ignored.</p>
         </section>
+        <div id="signInOverlay" class="overlay hidden">
+            <div class="modal">
+              <clerk-sign-in routing="hash"></clerk-sign-in>
+            </div>
+          </div>
     </div>
 </body>
 
