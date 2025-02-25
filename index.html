@@ -40,30 +40,51 @@
   type="text/javascript"
 ></script>
 <script>
-    window.addEventListener('load', async function() {
+  window.addEventListener('load', async function() {
+    try {
       await Clerk.load();
-  
+      
       const signInLink = document.getElementById('signInLink');
       const signInOverlay = document.getElementById('signInOverlay');
       const accountLink = document.getElementById('accountLink');
-  
-      // Open/close the overlay
-      signInLink.addEventListener('click', () => {
-        signInOverlay.classList.toggle('hidden');
+      
+      // Handle sign in overlay
+      signInLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        signInOverlay.classList.remove('hidden');
       });
-  
-      // Update nav based on auth state
-      Clerk.addListener(({ user }) => {
-        if (user) {
-          signInLink.classList.add('hidden');
-          accountLink.classList.remove('hidden');
-        } else {
-          signInLink.classList.remove('hidden');
-          accountLink.classList.add('hidden');
+
+      // Close overlay when clicking outside the modal
+      signInOverlay?.addEventListener('click', (e) => {
+        if (e.target === signInOverlay) {
+          signInOverlay.classList.add('hidden');
         }
       });
-    });
-  </script>
+
+      // Update navigation based on auth state
+      const updateNavigation = (user) => {
+        if (user) {
+          signInLink?.classList.add('hidden');
+          accountLink?.classList.remove('hidden');
+        } else {
+          signInLink?.classList.remove('hidden');
+          accountLink?.classList.add('hidden');
+        }
+      };
+
+      // Initial state check
+      updateNavigation(Clerk.user);
+
+      // Listen for auth state changes
+      Clerk.addListener(({ user }) => {
+        updateNavigation(user);
+      });
+
+    } catch (error) {
+      console.error('Failed to initialize Clerk:', error);
+    }
+  });
+</script>
   <style>
     .overlay {
       position: fixed;
