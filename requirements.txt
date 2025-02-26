@@ -3,3 +3,4 @@ redis
 flask-wtf
 markupsafe
 google-genai
+google

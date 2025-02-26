@@ -58,6 +58,10 @@ def page_not_found(e):
 def server_error(e):
     return redirect("https://http.cat/images/500.jpg")
 
+@app.route("/404")
+def error_404():
+    return redirect("https://")
+
 @app.route("/")
 def home():
     return render_template("index.html")
