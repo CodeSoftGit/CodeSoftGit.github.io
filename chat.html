@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f2f2f7;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-container {
+            flex: 1;
+            max-width: 750px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            text-align: center;
+            padding: 10px;
+            background-color: #f2f2f7;
+            position: sticky;
+            top: 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .message {
+            max-width: 70%;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background-color: #007bff;
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+        }
+        
+        .ai-message {
+            align-self: flex-start;
+            background-color: #e5e5ea;
+            color: black;
+            border-radius: 18px 18px 18px 4px;
+        }
+        
+        .message-time {
+            font-size: 10px;
+            margin-top: 4px;
+            opacity: 0.7;
+            text-align: right;
+        }
+        
+        .input-area {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            bottom: 0;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 20px;
+            background-color: #f2f2f7;
+            outline: none;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        
+        .send-button {
+            background-color: transparent;
+            border: none;
+            color: #007bff;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        
+        .send-button:disabled {
+            color: #b0b0b0;
+        }
+        
+        .typing-indicator {
+            align-self: flex-start;
+            background-color: #e5e5ea;
+            color: black;
+            border-radius: 18px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            display: none;
+        }
+        
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #999;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: typing 1s infinite ease-in-out;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+            margin-right: 0;
+        }
+        
+        @keyframes typing {
+            0% { transform: translateY(0px); }
+            25% { transform: translateY(-5px); }
+            50% { transform: translateY(0px); }
+        }
+        
+        .error-message {
+            color: #ff3b30;
+            font-size: 14px;
+            margin-top: 5px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-header">
+        <h2>AI Assistant</h2>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+    
+    <div class="chat-container" id="chatContainer">
+        <div class="message ai-message">
+            Hello! How can I help you today?
+            <div class="message-time">10:05 AM</div>
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    
+    <div class="input-area">
+        <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
+        <button class="send-button" id="sendButton">Send</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const typingIndicator = document.getElementById('typingIndicator');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Initial scroll to bottom
+            scrollToBottom();
+            
+            // Event listeners
+            sendButton.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Handle message sending
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message === '') return;
+                
+                // Add user message to chat
+                addUserMessage(message);
+                
+                // Clear input
+                messageInput.value = '';
+                
+                // Show typing indicator
+                typingIndicator.style.display = 'block';
+                scrollToBottom();
+                
+                // Send message to AI
+                sendToAI(message);
+            }
+            
+            // Send message to AI endpoint
+            function sendToAI(message) {
+                // Disable send button while waiting for response
+                sendButton.disabled = true;
+                
+                // Hide any previous error messages
+                errorMessage.style.display = 'none';
+                
+                fetch('/ai/gemini', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: message })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 429) {
+                            throw new Error('Rate limit exceeded. Please wait a moment before sending another message.');
+                        }
+                        throw new Error(`Error: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hide typing indicator
+                    typingIndicator.style.display = 'none';
+                    
+                    // Add AI response to chat
+                    if (data && data.response) {
+                        addAIMessage(data.response);
+                    } else {
+                        addAIMessage("I'm sorry, I couldn't process that request.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    
+                    // Hide typing indicator
+                    typingIndicator.style.display = 'none';
+                    
+                    // Show error message
+                    errorMessage.textContent = error.message;
+                    errorMessage.style.display = 'block';
+                    
+                    // If rate limited, wait before enabling the send button
+                    if (error.message.includes('Rate limit')) {
+                        setTimeout(() => {
+                            sendButton.disabled = false;
+                        }, 5000); // Wait 5 seconds before enabling
+                    } else {
+                        sendButton.disabled = false;
+                    }
+                })
+                .finally(() => {
+                    if (!sendButton.disabled) {
+                        sendButton.disabled = false;
+                    }
+                });
+            }
+            
+            // Add user message to chat
+            function addUserMessage(text) {
+                const time = getCurrentTime();
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message user-message';
+                messageElement.innerHTML = `
+                    ${text}
+                    <div class="message-time">${time}</div>
+                `;
+                chatContainer.appendChild(messageElement);
+                scrollToBottom();
+            }
+            
+            // Add AI message to chat
+            function addAIMessage(text) {
+                const time = getCurrentTime();
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message ai-message';
+                messageElement.innerHTML = `
+                    ${text}
+                    <div class="message-time">${time}</div>
+                `;
+                chatContainer.appendChild(messageElement);
+                scrollToBottom();
+            }
+            
+            // Get current time in format HH:MM AM/PM
+            function getCurrentTime() {
+                const now = new Date();
+                let hours = now.getHours();
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // Convert 0 to 12
+                return `${hours}:${minutes} ${ampm}`;
+            }
+            
+            // Scroll to bottom of chat
+            function scrollToBottom() {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -40,6 +40,8 @@ except Exception as e:
 # Load the secret passkey from the environment variable.
 REGISTRATION_PASSKEY = os.getenv("REGISTRATION_PASSKEY", "pass...")
 
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", None)
+
 @app.before_request
 def count_requests():
     path = request.path
@@ -193,3 +195,94 @@ def usage_insights():
         logging.error(f"Error fetching insights: {e}")
         abort(500)
     return render_template("insights.html", data=data)
+
+def get_gemini_response(query, **kwargs):
+    import base64
+    import os
+    from google import genai
+    from google.genai import types
+    
+    client = genai.Client(
+        api_key=os.environ.get("GEMINI_API_KEY"),
+    )
+
+    model = "gemini-2.0-flash-lite"
+    contents = [
+        types.Content(
+            role="user",
+            parts=[
+                types.Part.from_text(
+                    text=query,
+                ),
+            ],
+        ),
+    ]
+    generate_content_config = types.GenerateContentConfig(
+        temperature=0.7,
+        top_p=0.9,
+        top_k=40,
+        max_output_tokens=2048,
+        safety_settings=[
+          types.SafetySetting(
+              category="HARM_CATEGORY_HARASSMENT",
+              threshold="BLOCK_MEDIUM_AND_ABOVE", # Block some
+          ),
+          types.SafetySetting(
+              category="HARM_CATEGORY_HATE_SPEECH",
+              threshold="BLOCK_MEDIUM_AND_ABOVE", # Block some
+          ),
+          types.SafetySetting(
+              category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold="BLOCK_LOW_AND_ABOVE", # Block most
+          ),
+          types.SafetySetting(
+              category="HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold="BLOCK_MEDIUM_AND_ABOVE", # Block some
+          ),
+          types.SafetySetting(
+              category="HARM_CATEGORY_CIVIC_INTEGRITY",
+              threshold="BLOCK_LOW_AND_ABOVE", # Block most
+          ),
+      ],
+        response_mime_type="text/plain",
+    )
+
+    response = client.models.generate_content(
+        model=model,
+        contents=contents,
+        config=generate_content_config,
+    )
+    return response.text
+
+@app.route("/ai/<model>", methods=["POST"])
+def ai(model):
+    # Rate limit: 5 requests per minute per IP
+    ip = request.remote_addr
+    rate_limit_key = f"rate_limit:{ip}"
+    try:
+        count = redis_client.incr(rate_limit_key)
+        if count == 1:
+            redis_client.expire(rate_limit_key, 60)
+        if count > 5:
+            return "Rate limit exceeded. Try again later.", 429
+    except Exception as e:
+        logging.error(f"Error handling rate limit for IP {ip}: {e}")
+
+    if model == "gemini":
+        if not GEMINI_API_KEY:
+            return "Service unavailable. Please try again later or contact your sysadmin.", 503
+        try:
+            query = request.form.get("query", "")
+            if not query.strip():
+                return "Please provide a valid query.", 400
+            response = get_gemini_response(query)
+        except Exception as e:
+            logging.error(f"Error fetching Gemini response: {e}")
+            abort(500)
+        return response
+    else:
+        return "Invalid model", 400
+    
+@app.route("/ai")
+def chat_ui():
+    return render_template("chat.html")
