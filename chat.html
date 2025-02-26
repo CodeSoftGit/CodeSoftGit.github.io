@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -218,11 +217,13 @@
                 
                 // Hide any previous error messages
                 errorMessage.style.display = 'none';
-                const formData = new FormData();
-                formData.append('query', message);
+                
                 fetch('/ai/gemini', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: message })
                 })
                 .then(response => {
                     if (!response.ok) {

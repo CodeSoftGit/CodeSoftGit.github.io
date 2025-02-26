@@ -286,8 +286,8 @@ def ai(model):
             print("GEMINI_API_KEY not set")
             return "Service unavailable. Please try again later or contact your sysadmin.", 503
         try:
-            query = request.form.get("query", "")
-            if not query.strip():
+            query = json.loads(request.data)["query"]
+            if not query:
                 print("Invalid query")
                 return "Please provide a valid query.", 400
             response = get_gemini_response(query)
