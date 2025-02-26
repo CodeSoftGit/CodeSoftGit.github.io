@@ -23,7 +23,7 @@ from markupsafe import escape
 app = Flask(__name__, template_folder=".", static_folder=None)
 # Set a secret key for session and CSRF protection.
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", secrets.token_hex(16))
-csrf = CSRFProtect(app)
+# csrf = CSRFProtect(app)
 startTime = time.time()
 
 # Set up logging
