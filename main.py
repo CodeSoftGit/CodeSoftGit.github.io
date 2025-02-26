@@ -254,33 +254,50 @@ def get_gemini_response(query, **kwargs):
     )
     return response.text
 
+# Global in-memory rate limits dictionary for storing request counts per IP.
+# Each key is an IP address, and each value is a tuple (count, expiry timestamp).
+rate_limits = {}
+
 @app.route("/ai/<model>", methods=["POST"])
 def ai(model):
-    # Rate limit: 5 requests per minute per IP
+    # Rate limit: 5 requests per minute per IP using in-memory storage
     ip = request.remote_addr
-    rate_limit_key = f"rate_limit:{ip}"
-    try:
-        count = redis_client.incr(rate_limit_key)
-        if count == 1:
-            redis_client.expire(rate_limit_key, 60)
-        if count > 5:
-            return "Rate limit exceeded. Try again later.", 429
-    except Exception as e:
-        logging.error(f"Error handling rate limit for IP {ip}: {e}")
+    now = time.time()
+    window = 60  # seconds
+    max_requests = 5
+
+    count, expiry = rate_limits.get(ip, (0, 0))
+    if now >= expiry:
+        # Reset count if the window has expired.
+        count = 0
+
+    count += 1
+    if count == 1:
+        expiry = now + window
+
+    rate_limits[ip] = (count, expiry)
+
+    if count > max_requests:
+        print(f"Rate limit exceeded for IP {ip}")
+        return "Rate limit exceeded. Try again later.", 429
 
     if model == "gemini":
         if not GEMINI_API_KEY:
+            print("GEMINI_API_KEY not set")
             return "Service unavailable. Please try again later or contact your sysadmin.", 503
         try:
             query = request.form.get("query", "")
             if not query.strip():
+                print("Invalid query")
                 return "Please provide a valid query.", 400
             response = get_gemini_response(query)
         except Exception as e:
+            print(f"Error fetching Gemini response: {e}")
             logging.error(f"Error fetching Gemini response: {e}")
             abort(500)
         return response
     else:
+        print("Invalid model ", model)
         return "Invalid model", 400
     
 @app.route("/ai")
